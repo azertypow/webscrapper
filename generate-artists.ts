@@ -42,7 +42,7 @@ for (const artistName of entries) {
   // Read UUIDs from .txt files
   const imageUuids: string[] = [];
   for (const imageName of images) {
-    const txtFile = `${artistDir}/${imageName}.txt`;
+    const txtFile = `${artistDir}/${imageName}.en.txt`;
     try {
       const txtContent = await Deno.readTextFile(txtFile);
       // Extract UUID from the file (format: "Uuid: qJmYXNxA6vI2i2tD")
