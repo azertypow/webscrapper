@@ -1,8 +1,9 @@
 import { DOMParser } from "@b-fuze/deno-dom"
+import exit = Deno.exit;
 
 const url = "https://www.plattformplattform.ch/artists"
 
-async function getAllLinks() {
+async function getAllArtisteSubpageLinks() {
   console.log(`Fetching ${url}...`)
 
   const response = await fetch(url)
@@ -30,21 +31,39 @@ async function getAllLinks() {
     }
   })
 
-  // Display links
-  linkData.forEach(({ text, href }, index) => {
+  // Trier les liens
+  const filteredLinkData = linkData.map(({ text, href }, index) => {
     const fullUrl = href.startsWith("http")
       ? href
       : href.startsWith("/")
         ? `https://www.plattformplattform.ch${href}`
         : `https://www.plattformplattform.ch/${href}`
 
+    const isArtisteSubpageLink = fullUrl.startsWith("https://www.plattformplattform.ch/Artists/")
+
+    if(!isArtisteSubpageLink) return null
+
     console.log(`${index + 1}. ${text || "(no text)"}`)
     console.log(`   ${fullUrl}\n`)
+
+    return {
+      text,
+      href: fullUrl
+    }
   })
 
   console.log(`Total: ${linkData.length} links`)
 
-  return linkData
+  return filteredLinkData
 }
 
-getAllLinks()
+const artistePageLinks = await getAllArtisteSubpageLinks()
+
+if(!artistePageLinks) {
+  console.error("Failed to fetch links")
+  exit()
+}
+
+for(const link of artistePageLinks) {
+  console.log(link)
+}
