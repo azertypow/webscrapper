@@ -73,14 +73,16 @@ if(!artistePageLinks) {
   exit()
 }
 
-for(const link of artistePageLinks) {
+for(let i = 0; i < artistePageLinks.length; i++) {
+  const link = artistePageLinks[i]
   const response = await fetch(link.href)
   const html = await response.text()
   const doc = new DOMParser().parseFromString(html, "text/html")
 
   const images = doc.querySelectorAll('img')
 
-  let index = 5
+  const folderName = removeAccents(link.text).toLowerCase().replace(/ /g, '-')
+  const folderNameWithIndex = `${i}_${folderName}`
 
   images.forEach(image => {
     const imageSrc = image.getAttribute('src')
@@ -96,7 +98,7 @@ for(const link of artistePageLinks) {
     importImage({
       url: imageURL.href,
       filename: `${getFileNameWithoutExtension(imageURL.href)}.jpg`,
-      targetDir: `./images/${link.text.toLowerCase().replace(/ /g, '-')}`,
+      targetDir: `./images/${folderNameWithIndex}`,
     }).then(
       () => console.log(`Imported ${imageURL.href}`),
       (error) => console.error(`Failed to import ${imageURL.href}: ${error}`)
@@ -118,5 +120,9 @@ function getFileNameWithoutExtension(url: string): string {
     : url.length;
 
   return url.substring(start, end);
+}
+
+function removeAccents(str: string): string {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 

@@ -112,7 +112,7 @@ export async function importImage(
 
   const finalFilename = filename || `image-${Date.now()}.${extension}`;
   const imagePath = `${targetDir}/${finalFilename}`;
-  const metadataPath = `${imagePath}.txt`;
+  const metadataPath = `${imagePath}.en.txt`;
 
   // Créer le dossier cible s'il n'existe pas
   try {

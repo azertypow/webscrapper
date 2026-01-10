@@ -93,7 +93,7 @@ for (const artistName of entries) {
   newContent = newContent.replace(/Uuid: .+/, `Uuid: ${artistUuid}`);
 
   // Write the file
-  const outputFile = `${artistDir}/artist.de.txt`;
+  const outputFile = `${artistDir}/artist.en.txt`;
   await Deno.writeTextFile(outputFile, newContent);
   console.log(`  ✓ Created ${outputFile}\n`);
 }
