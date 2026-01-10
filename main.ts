@@ -1,4 +1,5 @@
-import { DOMParser } from "@b-fuze/deno-dom"
+import {DOMParser} from "@b-fuze/deno-dom"
+import {importImage} from "./import-image.ts";
 import exit = Deno.exit;
 
 const url = "https://www.plattformplattform.ch/artists"
@@ -32,25 +33,33 @@ async function getAllArtisteSubpageLinks() {
   })
 
   // Trier les liens
-  const filteredLinkData = linkData.map(({ text, href }, index) => {
-    const fullUrl = href.startsWith("http")
-      ? href
-      : href.startsWith("/")
-        ? `https://www.plattformplattform.ch${href}`
-        : `https://www.plattformplattform.ch/${href}`
+  const filteredLinkData = linkData
+    .filter(({ href }) => {
+      const fullUrl = href.startsWith("http")
+        ? href
+        : href.startsWith("/")
+          ? `https://www.plattformplattform.ch${href}`
+          : `https://www.plattformplattform.ch/${href}`
 
-    const isArtisteSubpageLink = fullUrl.startsWith("https://www.plattformplattform.ch/Artists/")
+      const isArtisteSubpageLink = fullUrl.startsWith("https://www.plattformplattform.ch/Artists/")
 
-    if(!isArtisteSubpageLink) return null
+      return isArtisteSubpageLink
+    })
+    .map(({text, href}, index) => {
+      const fullUrl = href.startsWith("http")
+        ? href
+        : href.startsWith("/")
+          ? `https://www.plattformplattform.ch${href}`
+          : `https://www.plattformplattform.ch/${href}`
 
-    console.log(`${index + 1}. ${text || "(no text)"}`)
-    console.log(`   ${fullUrl}\n`)
+      console.log(`${index + 1}. ${text || "(no text)"}`)
+      console.log(`   ${fullUrl}\n`)
 
-    return {
-      text,
-      href: fullUrl
-    }
-  })
+      return {
+        text,
+        href: fullUrl
+      }
+    })
 
   console.log(`Total: ${linkData.length} links`)
 
@@ -65,5 +74,46 @@ if(!artistePageLinks) {
 }
 
 for(const link of artistePageLinks) {
-  console.log(link)
+  const response = await fetch(link.href)
+  const html = await response.text()
+  const doc = new DOMParser().parseFromString(html, "text/html")
+
+  const images = doc.querySelectorAll('img')
+
+  images.forEach(image => {
+    const imageSrc = image.getAttribute('src')
+
+    if(!imageSrc) return
+
+    const autorisedImageExtention = imageSrc.endsWith('.jpg') || imageSrc.endsWith('.jpeg') || imageSrc.endsWith('.png')
+
+    if( !autorisedImageExtention ) return
+
+    const imageURL = new URL(imageSrc, link.href)
+
+    importImage({
+      url: imageURL.href,
+      filename: `${getFileNameWithoutExtension(imageURL.href)}.jpg`,
+      targetDir: `./images/${link.text}`
+    }).then(
+      () => console.log(`Imported ${imageURL.href}`),
+      (error) => console.error(`Failed to import ${imageURL.href}: ${error}`)
+    )
+  })
+
+}
+
+
+function getFileNameWithoutExtension(url: string): string {
+  const lastSlashIndex = url.lastIndexOf('/');
+  const lastDotIndex = url.lastIndexOf('.');
+
+  if (lastSlashIndex === -1) return '';
+
+  const start = lastSlashIndex + 1;
+  const end = lastDotIndex !== -1 && lastDotIndex > lastSlashIndex
+    ? lastDotIndex
+    : url.length;
+
+  return url.substring(start, end);
 }

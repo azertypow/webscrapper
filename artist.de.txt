@@ -1,0 +1,53 @@
+Title: Mohamed Abdelkarim
+
+----
+
+Fullname: Mohamed Abdelkarim
+
+----
+
+Lastname: Abdelkarim
+
+----
+
+Edition:
+
+----
+
+Description:
+
+----
+
+Gallery:
+
+-
+  image:
+    - file://rkms1h9uimmoqhql
+  caption:
+-
+  image:
+    - file://dfqlmbaabnge5sgq
+  caption:
+-
+  image:
+    - file://vqklgblpo8vezxno
+  caption:
+-
+  image:
+    - file://fnduymnjtocl5yhq
+  caption:
+-
+  image:
+    - file://bcnzjmltfzmc3vyr
+  caption:
+-
+  image:
+    - file://nevcqg6ybpxwn1an
+  caption:
+----
+
+Metadescription:
+
+----
+
+Uuid: qnceprtzvair5oar
