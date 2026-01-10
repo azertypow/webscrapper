@@ -1,5 +1,5 @@
 const imagesDir = "./images";
-const templateFile = "./artist.de.txt";
+const templateFile = "./artist.en.txt";
 
 // Read the template file
 const templateContent = await Deno.readTextFile(templateFile);

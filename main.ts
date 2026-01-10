@@ -80,6 +80,8 @@ for(const link of artistePageLinks) {
 
   const images = doc.querySelectorAll('img')
 
+  let index = 5
+
   images.forEach(image => {
     const imageSrc = image.getAttribute('src')
 
@@ -94,7 +96,7 @@ for(const link of artistePageLinks) {
     importImage({
       url: imageURL.href,
       filename: `${getFileNameWithoutExtension(imageURL.href)}.jpg`,
-      targetDir: `./images/${link.text}`
+      targetDir: `./images/${link.text.toLowerCase().replace(/ /g, '-')}`,
     }).then(
       () => console.log(`Imported ${imageURL.href}`),
       (error) => console.error(`Failed to import ${imageURL.href}: ${error}`)
@@ -117,3 +119,4 @@ function getFileNameWithoutExtension(url: string): string {
 
   return url.substring(start, end);
 }
+
