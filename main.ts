@@ -2,13 +2,13 @@ import {DOMParser} from "@b-fuze/deno-dom"
 import {importImage} from "./import-image.ts";
 import exit = Deno.exit;
 
-const url = "https://www.plattformplattform.ch/artists"
 
 async function getAllArtisteSubpageLinks() {
-  console.log(`Fetching ${url}...`)
 
-  const response = await fetch(url)
-  const html = await response.text()
+  const bytes = Deno.readFileSync('./index.html');
+
+// Convertir les octets en texte
+  const html = new TextDecoder().decode(bytes);
 
   const doc = new DOMParser().parseFromString(html, "text/html")
 
@@ -73,6 +73,14 @@ if(!artistePageLinks) {
   exit()
 }
 
+// Créer un tableau pour stocker les informations des artistes
+const artistsData: Array<{
+  index: number,
+  folderName: string,
+  originalName: string,
+  url: string
+}> = []
+
 for(let i = 0; i < artistePageLinks.length; i++) {
   const link = artistePageLinks[i]
   const response = await fetch(link.href)
@@ -83,6 +91,14 @@ for(let i = 0; i < artistePageLinks.length; i++) {
 
   const folderName = removeAccents(link.text).toLowerCase().replace(/ /g, '-')
   const folderNameWithIndex = `${i}_${folderName}`
+
+  // Ajouter les informations de l'artiste au tableau
+  artistsData.push({
+    index: i,
+    folderName: folderNameWithIndex,
+    originalName: link.text,
+    url: link.href
+  })
 
   images.forEach(image => {
     const imageSrc = image.getAttribute('src')
@@ -106,6 +122,14 @@ for(let i = 0; i < artistePageLinks.length; i++) {
   })
 
 }
+
+// Sauvegarder les données dans un fichier JSON
+await Deno.writeTextFile(
+  './artists-data.json',
+  JSON.stringify(artistsData, null, 2)
+)
+
+console.log('\n✅ Artists data saved to artists-data.json')
 
 
 function getFileNameWithoutExtension(url: string): string {
