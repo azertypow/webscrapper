@@ -73,14 +73,6 @@ if(!artistePageLinks) {
   exit()
 }
 
-// Créer un tableau pour stocker les informations des artistes
-const artistsData: Array<{
-  index: number,
-  folderName: string,
-  originalName: string,
-  url: string
-}> = []
-
 for(let i = 0; i < artistePageLinks.length; i++) {
   const link = artistePageLinks[i]
   const response = await fetch(link.href)
@@ -89,16 +81,33 @@ for(let i = 0; i < artistePageLinks.length; i++) {
 
   const images = doc.querySelectorAll('img')
 
-  const folderName = removeAccents(link.text).toLowerCase().replace(/ /g, '-')
+  const folderName = removeAccents(link.text).toLowerCase().replace(/ /g, '-').replace(/\//g, '')
   const folderNameWithIndex = `${i}_${folderName}`
+  const targetDir = `./images/${folderNameWithIndex}`
 
-  // Ajouter les informations de l'artiste au tableau
-  artistsData.push({
+  // Créer le dossier s'il n'existe pas
+  try {
+    await Deno.mkdir(targetDir, { recursive: true })
+  } catch (error) {
+    if (!(error instanceof Deno.errors.AlreadyExists)) {
+      throw error
+    }
+  }
+
+  // Créer le fichier JSON avec les informations de l'artiste dans le dossier
+  const artistData = {
     index: i,
     folderName: folderNameWithIndex,
     originalName: link.text,
     url: link.href
-  })
+  }
+
+  await Deno.writeTextFile(
+    `${targetDir}/artist-info.json`,
+    JSON.stringify(artistData, null, 2)
+  )
+
+  console.log(`✅ Created artist info for: ${link.text}`)
 
   images.forEach(image => {
     const imageSrc = image.getAttribute('src')
@@ -114,7 +123,7 @@ for(let i = 0; i < artistePageLinks.length; i++) {
     importImage({
       url: imageURL.href,
       filename: `${getFileNameWithoutExtension(imageURL.href)}.jpg`,
-      targetDir: `./images/${folderNameWithIndex}`,
+      targetDir: targetDir,
     }).then(
       () => console.log(`Imported ${imageURL.href}`),
       (error) => console.error(`Failed to import ${imageURL.href}: ${error}`)
@@ -123,13 +132,7 @@ for(let i = 0; i < artistePageLinks.length; i++) {
 
 }
 
-// Sauvegarder les données dans un fichier JSON
-await Deno.writeTextFile(
-  './artists-data.json',
-  JSON.stringify(artistsData, null, 2)
-)
-
-console.log('\n✅ Artists data saved to artists-data.json')
+console.log('\n✅ All artist data saved to individual folders')
 
 
 function getFileNameWithoutExtension(url: string): string {

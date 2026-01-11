@@ -14,9 +14,15 @@ for await (const entry of Deno.readDir(imagesDir)) {
 
 console.log(`Found ${entries.length} artist directories\n`);
 
-for (const artistName of entries) {
-  const artistDir = `${imagesDir}/${artistName}`;
-  console.log(`Processing: ${artistName}`);
+for (const directory of entries) {
+  console.log(`${imagesDir}/${directory}/artist-info.json`);
+  const ArtisteDataJsonPath = `${imagesDir}/${directory}/artist-info.json`;
+  const ArtisteDataText = await Deno.readTextFile(ArtisteDataJsonPath);
+  const artistData = JSON.parse(ArtisteDataText);
+  const originalName = artistData.originalName;
+
+  const artistDir = `${imagesDir}/${directory}`;
+  console.log(`Processing: ${directory}`);
 
   // Get all image files in the directory
   const images: string[] = [];
@@ -71,14 +77,13 @@ for (const artistName of entries) {
   let newContent = templateContent;
 
   // Replace Title
-  newContent = newContent.replace(/Title: .+/, `Title: ${artistName}`);
+  newContent = newContent.replace(/Title: .+/, `Title: ${originalName}`);
 
   // Replace Fullname
-  newContent = newContent.replace(/Fullname: .+/, `Fullname: ${artistName}`);
+  newContent = newContent.replace(/Fullname: .+/, `Fullname: ${originalName}`);
 
   // Extract lastname (last word of the name)
-  const nameParts = artistName.split(" ");
-  const lastname = nameParts[nameParts.length - 1];
+  const lastname = originalName.split(" ").at(-1);
   newContent = newContent.replace(/Lastname: .+/, `Lastname: ${lastname}`);
 
   // Replace Gallery section
